@@ -9,7 +9,7 @@ declare(strict_types=1);
  * Created at: 2022-05-17, 15:23
  */
 
-namespace Radix\Unit\Tests;
+namespace Radix\Tests\Unit;
 
 /**
  * Class AuthenticateTest
