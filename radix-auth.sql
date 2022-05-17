@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS users(
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(10) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY username (username),
+    UNIQUE KEY email (email)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS sessions (
+    id VARCHAR(40) NOT NULL PRIMARY KEY,
+    expiry INT(10) unsigned NOT NULL,
+    data TEXT NOT NULL
+) ENGINE = InnoDB;

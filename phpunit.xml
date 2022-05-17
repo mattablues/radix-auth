@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpunit colors="true"
+         bootstrap="vendor/autoload.php"
+         convertErrorsToExceptions="true"
+         convertWarningsToExceptions="true"
+         convertNoticesToExceptions="true"
+         cacheResult ="false"
+         testdox="true"
+         stderr="true">
+    <testsuites>
+        <testsuite name="Unit Tests">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <const name="PHPUNIT_RUNNING" value="true" />
+    </php>
+</phpunit>

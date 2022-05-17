@@ -1,0 +1,29 @@
+{
+    "name": "malle/radix-auth",
+    "description": "Radix Authenticate System",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "malle",
+            "email": "malle@akebrands.se"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Radix\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Radix\\Tests\\": "tests"
+        }
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^6.0",
+        "phpunit/phpunit": "^9.5"
+    },
+    "require": {
+        "vlucas/phpdotenv": "^5.4",
+        "ext-pdo": "*"
+    }
+}
