@@ -36,4 +36,14 @@ class Prep
 
         return $matches;
     }
+
+    /**
+     * Hash crd32
+     * @param  string  $identifier
+     * @return bool|string
+     */
+    public static function hash(string $identifier): bool|string
+    {
+        return hash('crc32', microtime(true) . mt_rand() . $identifier);
+    }
 }

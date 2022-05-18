@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Radix\Auth;
 
+use JetBrains\PhpStorm\NoReturn;
 use Radix\Configuration\Config;
 use Radix\Model\User;
 use Radix\Session\Session;
@@ -62,8 +63,65 @@ class Auth
 
                 $this->confirmIsValid();
 
+                $rememberMe = $data['remember_me'] ?? 'off';
+
+                if ($rememberMe === 'on' && $user->role !== 'admin') {
+                    $autologin = new Autologin();
+                    $autologin->persistentLogin();
+                }
+
                 return true;
             }
+        }
+
+        $this->errors = $validator->hasErrors();
+
+        return false;
+    }
+
+    public function revalidate(array $data): bool
+    {
+        $validator = new Validator($data);
+
+        $validator->rules('username', 'required');
+        $validator->rules('password', 'required');
+
+        $validator->validate();
+
+        $sessionInvalid = $this->session->get('invalid');
+
+        if (!$sessionInvalid) {
+            $this->session->set('invalid', 0);
+        }
+
+        $user = $this->authenticate($data);
+
+        if (!$user && !empty($data['username']) && !empty($data['password'])) {
+            $validator->addError('form-error', $this->config->get('rule.add.revalidate'));
+            $sessionInvalid++;
+            $this->session->set('invalid', $sessionInvalid);
+        }
+
+        if($this->session->get('invalid') >= $this->config->get('form.revalidate.max')) {
+            $remember = $this->session->get($this->config->env('SESSION_PERSIST'));
+            $cookie = $this->session->get($this->config->env('SESSION_COOKIE_NAME'));
+
+            if (isset($remember) || isset($cookie)) {
+                $autologin = new Autologin();
+                $autologin->logout();
+            }
+
+            $this->logout();
+
+
+            // Redirect
+        }
+
+        if ($user && $validator->validate()) {
+            session_regenerate_id(true);
+            $this->session->set('revalidated', true);
+
+            return true;
         }
 
         $this->errors = $validator->hasErrors();
@@ -77,9 +135,14 @@ class Auth
      */
     public function user(): ?User
     {
-        $user = new User();
+        if ($this->isLoggedIn()) {
+            $user = new User();
+            $user->find('username', '=', $this->session->get('username'));
 
-        return $user->find('username', '=', $this->session->get('username'));
+            return $user;
+        }
+
+        return null;
     }
 
     /**
@@ -105,7 +168,18 @@ class Auth
      */
     public function isLoggedIn(): bool
     {
-        if ($this->user()) {
+        $sessionAuthenticated = $this->session->get('authenticated');
+        $sessionCookie = $this->session->get($this->config->env('SESSION_COOKIE_NAME'));
+
+        if (isset($sessionAuthenticated) || isset($sessionCookie)) {
+            return true;
+        }
+
+        $autologin = new Autologin();
+        $autologin->checkCredentials();
+        $cookie = $this->session->get($this->config->env('SESSION_COOKIE_NAME'));
+
+        if (isset($cookie)) {
             return true;
         }
 
@@ -138,6 +212,36 @@ class Auth
         }
 
         session_destroy();
+    }
+
+    /**
+     * Logout if account is closed
+     * @return void
+     */
+    #[NoReturn] public function logoutClosedAccount(): void
+    {
+        $this->clearAutologin();
+        $this->logout();
+
+        // Redirect
+    }
+
+    /**
+     * Remember requested page
+     * @return void
+     */
+    public function rememberRequestedPage(): void
+    {
+        $this->session->set('return_to', $_SERVER['REQUEST_URI']);
+    }
+
+    /**
+     * Return to page
+     * @return string
+     */
+    public function returnToPage(): string
+    {
+        //return $this->session->get('return_to')  ?? $this->config->get('route.user.index');
     }
 
     /**
@@ -261,5 +365,15 @@ class Auth
         }
 
         return false;
+    }
+
+    /**
+     * Clear autologin
+     * @return void
+     */
+    private function clearAutologin(): void
+    {
+        $autologin = new Autologin();
+        $autologin->logout();
     }
 }

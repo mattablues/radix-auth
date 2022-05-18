@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Radix\Configuration;
 
 use Radix\Database\DatabaseConnection;
+use Radix\Session\PersistentSessionHandler;
 use Radix\Session\RadixSessionHandler;
 
 /**
@@ -52,7 +53,7 @@ class Server
     public function setSessionHandler(): void
     {
         $connection = new DatabaseConnection();
-        $handler = new RadixSessionHandler($connection);
+        $handler = new PersistentSessionHandler($connection);
         session_set_save_handler($handler);
     }
 

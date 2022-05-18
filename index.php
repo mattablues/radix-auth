@@ -13,6 +13,7 @@ use Dotenv\Dotenv;
 use Radix\Auth\Auth;
 use Radix\Configuration\Server;
 use Radix\Session\Session;
+use Radix\Utilities\Prep;
 
 require __DIR__ . '/support/helpers.php';
 require __DIR__ . '/vendor/autoload.php';
@@ -31,6 +32,5 @@ $session->set('active', time());
 
 $auth = new Auth();
 
-$auth->login(['login' => 'admin', 'password' => '']);
-
-var_dump($auth->user(), $auth->userIsAdmin());
+/*var_dump($auth->login(['login' => 'admin', 'password' => 'secret', 'remember_me' => 'on']));
+var_dump($auth->revalidate(['login' => 'admin', 'password' => 'secret']));*/
