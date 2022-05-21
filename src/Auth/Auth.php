@@ -13,8 +13,10 @@ namespace Radix\Auth;
 
 use JetBrains\PhpStorm\NoReturn;
 use Radix\Configuration\Config;
+use Radix\Model\FailedLogin;
 use Radix\Model\User;
 use Radix\Session\Session;
+use Radix\Utilities\Prep;
 use Radix\Validator\Validator;
 
 /**
@@ -48,8 +50,38 @@ class Auth
 
         $validator->rules('login', 'required');
         $validator->rules('password', 'required');
+        $rememberMe = $data['remember_me'] ?? 'off';
 
         $user = $this->authenticate($data);
+        $failed = new Failed();
+        $failed->login($data['login']);
+        $hasFailed = $failed->get();
+
+        if (!empty($data['login']) && !empty($data['password'])) {
+            if ($user->status === 0) {
+                $validator->addError('form-error', $this->config->get('rule.add.activate'));
+            }
+
+            if ($user->status === 2 || $hasFailed && $failed->blocked()) {
+/*                $contact = '<a href="/'.$this->config->get('route.contact.index').'">' . $this->config->get('email.contact').'</a>';*/
+                $validator->addError('form-error', $this->config->get('rule.add.blocked'));
+            }
+
+            if ($user->status === 3) {
+                $validator->addError('form-error', $this->config->get('rule.add.closed'));
+            }
+        }
+
+        if ($hasFailed && $failed->throttle() > 0) {
+            $prefix = Prep::prefix($failed->throttle(), 'minut', 'er');
+            $validator->addError('form-error', $this->config->get('rule.add.throttle'), $prefix);
+
+        }
+        else if (!$user && !empty($data['login']) && !empty($data['password'])) {
+            $validator->addError('form-error', $this->config->get('rule.add.failed'));
+            $failed->record();
+        }
+
 
         if ($validator->validate()) {
             if ($user) {
@@ -62,8 +94,6 @@ class Auth
                 $this->session->set('last_login', time());
 
                 $this->confirmIsValid();
-
-                $rememberMe = $data['remember_me'] ?? 'off';
 
                 if ($rememberMe === 'on' && $user->role !== 'admin') {
                     $autologin = new Autologin();
@@ -79,6 +109,11 @@ class Auth
         return false;
     }
 
+    /**
+     * Revalidate
+     * @param  array  $data
+     * @return bool
+     */
     public function revalidate(array $data): bool
     {
         $validator = new Validator($data);

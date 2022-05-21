@@ -46,4 +46,21 @@ class Prep
     {
         return hash('crc32', microtime(true) . mt_rand() . $identifier);
     }
+
+    /**
+     * Prefix
+     * @param  int|float  $larger
+     * @param  string  $message
+     * @param  string  $prefix
+     * @param  int  $less
+     * @return string
+     */
+    public static function prefix(int|float $larger, string $message, string $prefix, int $less = 1): string
+    {
+        if ($larger > $less) {
+            return $larger . ' ' . $message . $prefix;
+        }
+
+        return $larger . ' ' . $message;
+    }
 }

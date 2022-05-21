@@ -222,7 +222,7 @@ class RadixSessionHandler implements SessionHandlerInterface
     }
 
     /**
-     * Register new session ID in database when using transactions
+     * Account new session ID in database when using transactions
      * @param  PDOStatement  $selectStmt
      * @return string
      */

@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Radix\Validator;
 
+use Radix\Auth\Auth;
 use Radix\Database\DatabaseConnection;
 use Radix\Utilities\Check;
 use Radix\Utilities\Clean;
@@ -196,15 +197,15 @@ class Rule
     public function unique(?string $table, string $field): bool
     {
         if (isset($table)) {
-/*            $auth = new Auth();
+            $auth = new Auth();
             $user = $auth->user();
 
             if ($this->rule['unique'] === 'except' && $auth->isLoggedIn() && $this->data === $user->$field) {
                 return false;
-            }*/
+            }
 
             $connection = new DatabaseConnection();
-            $db = $connection->getConnection();
+            $db = $connection->get();
 
             $stmt = $db->prepare("SELECT $field FROM $table WHERE $field = :$field");
             $stmt->execute([$field => $this->data]);

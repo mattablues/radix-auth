@@ -10,10 +10,9 @@ declare(strict_types=1);
  */
 
 use Dotenv\Dotenv;
-use Radix\Auth\Auth;
+use Radix\Auth\Account;
 use Radix\Configuration\Server;
 use Radix\Session\Session;
-use Radix\Utilities\Prep;
 
 require __DIR__ . '/support/helpers.php';
 require __DIR__ . '/vendor/autoload.php';
@@ -30,7 +29,9 @@ $session = new Session();
 $session->start();
 $session->set('active', time());
 
-$auth = new Auth();
+$account = new Account();
+/*$account->forgotPassword(['email' => 'mats@akebrands.se']);*/
 
-/*var_dump($auth->login(['login' => 'admin', 'password' => 'secret', 'remember_me' => 'on']));
-var_dump($auth->revalidate(['login' => 'admin', 'password' => 'secret']));*/
+/*$account->update(['id' => 2, 'visible' => 'off']);*/
+
+/*$account->save(['username' => 'mats', 'email' => 'mats@akebrands.se', 'password' => 'korvar65', 'password_repeat' => 'korvar65']);*/
